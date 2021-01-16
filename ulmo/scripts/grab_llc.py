@@ -30,7 +30,7 @@ def main(pargs):
     import xmitgcm.llcreader as llcreader
     from ulmo.llc.slurp import write_xr
 
-    # Load model
+    # Load model once
     if pargs.model == 'LLC4320':
         model = llcreader.ECCOPortalLLC4320Model()
         tstep_hr = 144  # Time steps per hour
@@ -40,10 +40,17 @@ def main(pargs):
     ds = model.get_dataset(varnames=pargs.var.split(','),
                                k_levels=[0], type='latlon',
                                iter_step=iter_step)  
+    tsize = ds.time.size                           
     print("Model is ready")
 
     # Loop me
-    for tt in range(ds.time.size):
+    for tt in range(tsize):
+        # Get dataset
+        iter_step = tstep_hr*pargs.tstep
+        ds = model.get_dataset(varnames=pargs.var.split(','),
+                                k_levels=[0], type='latlon',
+                               iter_step=iter_step)  
+        #
         print("Time step = {} of {}".format(tt, ds.time.size))
         #SST = ds_sst.Theta.isel(time=tt, k=0)  # , i=slice(1000,2000), j=slice(1000,2000))
         ds_0 = ds.isel(time=tt, k=0)  # , i=slice(1000,2000), j=slice(1000,2000))
@@ -57,6 +64,8 @@ def main(pargs):
         # Write
         write_xr(ds_0, outfile)
         print("Wrote: {}".format(outfile))
-        embed(header='60 of slurp')
+        del(ds)
+        #embed(header='60 of slurp')
 
 
+# ulmo_grab_llc 12 --var Theta,U,V,W,Salt
