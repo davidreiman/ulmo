@@ -12,6 +12,8 @@ def parser(options=None):
                         help="LLC Model name.  Allowed options are [LLC4320]")
     parser.add_argument("--var", type=str, default='Theta',
                         help="LLC data variable name.  Allowed options are [Theta, U, V, Salt]")
+    parser.add_argument("--istart", type=int, default=0,
+                        help="Index of model to start with")
 
     if options is None:
         pargs = parser.parse_args()
@@ -44,7 +46,7 @@ def main(pargs):
     print("Model is ready")
 
     # Loop me
-    for tt in range(tsize):
+    for tt in range(pargs.istart, tsize):
         # Get dataset
         iter_step = tstep_hr*pargs.tstep
         ds = model.get_dataset(varnames=pargs.var.split(','),
